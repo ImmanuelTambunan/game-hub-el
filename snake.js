@@ -1,8 +1,10 @@
+// @ts-nocheck
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const scoreDisplay = document.getElementById("score");
+const pauseBtn = document.getElementById("btnPause");
 
-const gridSize = 15; // Ukuran tiap kotak (300 / 15 = 20x20 petak)
+const gridSize = 15; // 300 / 15 = 20x20 petak
 const tileCount = canvas.width / gridSize;
 
 let snake = [{ x: 10, y: 10 }];
@@ -11,43 +13,53 @@ let dx = 0;
 let dy = 0;
 let score = 0;
 let gameInterval = null;
+let isPaused = false;
+let isGameOver = false;
 
-// Gambar Game Loop
-function drawGame() {
-    moveSnake();
-
-    if (checkGameOver()) {
-        if (gameInterval) clearInterval(gameInterval);
-        alert(`Game Over! Skor kamu: ${score}`);
-        resetGame();
-        return;
-    }
-
-    // Bersihkan layar canvas
+// Render tampilan canvas utama
+function drawCanvas() {
+    // Bersihkan layar
     ctx.fillStyle = "#1e293b";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Gambar Makanan (Apel Merah)
+    // Gambar Apel Merah
     ctx.fillStyle = "#ef4444";
     ctx.beginPath();
     ctx.arc((food.x * gridSize) + gridSize / 2, (food.y * gridSize) + gridSize / 2, gridSize / 2 - 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // Gambar Ular (Hijau Neon)
+    // Gambar Ular Hijau Neon
     snake.forEach((part, index) => {
         ctx.fillStyle = index === 0 ? "#34d399" : "#10b981";
         ctx.fillRect(part.x * gridSize + 1, part.y * gridSize + 1, gridSize - 2, gridSize - 2);
     });
 }
 
+// Game Loop per frame waktu
+function gameLoop() {
+    if (isPaused || isGameOver) return;
+
+    moveSnake();
+
+    if (checkGameOver()) {
+        isGameOver = true;
+        if (gameInterval) clearInterval(gameInterval);
+        setTimeout(() => {
+            alert(`Game Over! Skor kamu: ${score}`);
+            resetGame();
+        }, 30);
+        return;
+    }
+
+    drawCanvas();
+}
+
 function moveSnake() {
-    // Jika belum mulai jalan, jangan gerak
     if (dx === 0 && dy === 0) return;
 
     const head = { x: snake[0].x + dx, y: snake[0].y + dy };
     snake.unshift(head);
 
-    // Cek jika makan apel
     if (head.x === food.x && head.y === food.y) {
         score += 10;
         scoreDisplay.textContent = score.toString();
@@ -62,7 +74,6 @@ function spawnFood() {
         x: Math.floor(Math.random() * tileCount),
         y: Math.floor(Math.random() * tileCount)
     };
-    // Pastikan apel tidak muncul di tubuh ular
     snake.forEach(part => {
         if (part.x === food.x && part.y === food.y) spawnFood();
     });
@@ -73,12 +84,12 @@ function checkGameOver() {
 
     const head = snake[0];
 
-    // Tabrak dinding
+    // Cek tabrak dinding
     if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
         return true;
     }
 
-    // Tabrak tubuh sendiri
+    // Cek tabrak ekor/tubuh sendiri
     for (let i = 1; i < snake.length; i++) {
         if (head.x === snake[i].x && head.y === snake[i].y) {
             return true;
@@ -93,34 +104,65 @@ function resetGame() {
     dy = 0;
     score = 0;
     scoreDisplay.textContent = "0";
+    isGameOver = false;
+    isPaused = false;
+    if (pauseBtn) {
+        pauseBtn.textContent = "⏸ Pause";
+        pauseBtn.style.background = "#f59e0b";
+    }
     spawnFood();
+    drawCanvas();
     startGame();
 }
 
-/**
- * Mengubah arah gerakan ular
- * @param {number} nextX
- * @param {number} nextY
- */
 function changeDirection(nextX, nextY) {
-    // Cegah putar balik 180 derajat langsung
+    if (isPaused || isGameOver) return;
     if (dx === -nextX && dx !== 0) return;
     if (dy === -nextY && dy !== 0) return;
     dx = nextX;
     dy = nextY;
 }
 
-// Event Tombol Virtual (HP Touch)
+// Fitur Pause & Lanjut
+function togglePause() {
+    if (isGameOver) return;
+    isPaused = !isPaused;
+
+    if (isPaused) {
+        if (pauseBtn) {
+            pauseBtn.textContent = "▶ Lanjut";
+            pauseBtn.style.background = "#10b981";
+        }
+        // Gambar overlay teks PAUSED
+        ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#38bdf8";
+        ctx.font = "bold 24px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+    } else {
+        if (pauseBtn) {
+            pauseBtn.textContent = "⏸ Pause";
+            pauseBtn.style.background = "#f59e0b";
+        }
+        drawCanvas();
+    }
+}
+
+// Event Tombol Virtual D-Pad
 document.getElementById("btnUp")?.addEventListener("click", () => changeDirection(0, -1));
 document.getElementById("btnDown")?.addEventListener("click", () => changeDirection(0, 1));
 document.getElementById("btnLeft")?.addEventListener("click", () => changeDirection(-1, 0));
 document.getElementById("btnRight")?.addEventListener("click", () => changeDirection(1, 0));
+pauseBtn?.addEventListener("click", togglePause);
 
 function startGame() {
     if (gameInterval) clearInterval(gameInterval);
-    gameInterval = setInterval(drawGame, 120);
+    gameInterval = setInterval(gameLoop, 120);
 }
 
 // Inisialisasi awal
 spawnFood();
+drawCanvas();
 startGame();

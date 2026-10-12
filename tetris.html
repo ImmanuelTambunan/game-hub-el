@@ -42,6 +42,22 @@
             font-weight: 600;
         }
 
+        .btn-pause {
+            background: #f59e0b;
+            color: #0f172a;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-pause:active {
+            transform: scale(0.95);
+        }
+
         .scoreboard {
             font-size: 0.95rem;
             font-weight: 700;
@@ -112,10 +128,11 @@
 
     <div class="header-bar">
         <a href="index.html" class="btn-back">⬅ Menu</a>
+        <button class="btn-pause" id="btnPause">⏸ Pause</button>
         <div class="scoreboard">Skor: <span id="score">0</span></div>
     </div>
 
-    <!-- Canvas Grid 10 x 20 (200px x 400px) -->
+    <!-- Canvas Grid 10 x 20 -->
     <canvas id="tetrisCanvas" width="200" height="400"></canvas>
 
     <div class="controls">

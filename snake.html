@@ -25,7 +25,7 @@
 
         .header-bar {
             width: 100%;
-            max-width: 360px;
+            max-width: 300px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -40,6 +40,22 @@
             border-radius: 8px;
             font-size: 0.85rem;
             font-weight: 600;
+        }
+
+        .btn-pause {
+            background: #f59e0b;
+            color: #0f172a;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .btn-pause:active {
+            transform: scale(0.95);
         }
 
         .scoreboard {
@@ -95,13 +111,14 @@
 
     <div class="header-bar">
         <a href="index.html" class="btn-back">⬅ Menu</a>
+        <button class="btn-pause" id="btnPause">⏸ Pause</button>
         <div class="scoreboard">Skor: <span id="score">0</span></div>
     </div>
 
     <!-- Canvas Tempat Game Dirender -->
     <canvas id="gameCanvas" width="300" height="300"></canvas>
 
-    <!-- Tombol Khusus Layar Sentuh HP -->
+    <!-- Tombol Virtual Layar Sentuh HP -->
     <div class="controls">
         <button class="ctrl-btn btn-up" id="btnUp">▲</button>
         <button class="ctrl-btn btn-left" id="btnLeft">◀</button>

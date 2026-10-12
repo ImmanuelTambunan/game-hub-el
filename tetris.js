@@ -2,12 +2,12 @@
 const canvas = document.getElementById("tetrisCanvas");
 const ctx = canvas.getContext("2d");
 const scoreDisplay = document.getElementById("score");
+const pauseBtn = document.getElementById("btnPause");
 
 const COLS = 10;
 const ROWS = 20;
-const BLOCK_SIZE = 20; // 200 / 10 = 20px
+const BLOCK_SIZE = 20;
 
-// Bentuk balok Tetris
 const SHAPES = [
     [[1, 1, 1, 1]], // I
     [[1, 1], [1, 1]], // O
@@ -19,13 +19,7 @@ const SHAPES = [
 ];
 
 const COLORS = [
-    "#06b6d4", // Cyan
-    "#eab308", // Yellow
-    "#a855f7", // Purple
-    "#f97316", // Orange
-    "#3b82f6", // Blue
-    "#22c55e", // Green
-    "#ef4444"  // Red
+    "#06b6d4", "#eab308", "#a855f7", "#f97316", "#3b82f6", "#22c55e", "#ef4444"
 ];
 
 let board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -34,6 +28,7 @@ let currentPiece = null;
 let dropCounter = 0;
 let lastTime = 0;
 let gameOver = false;
+let isPaused = false;
 
 function createPiece() {
     const index = Math.floor(Math.random() * SHAPES.length);
@@ -50,8 +45,7 @@ function collide(arena, piece) {
     const o = { x: piece.x, y: piece.y };
     for (let y = 0; y < m.length; ++y) {
         for (let x = 0; x < m[y].length; ++x) {
-            if (m[y][x] !== 0 &&
-               (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
+            if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
                 return true;
             }
         }
@@ -62,9 +56,7 @@ function collide(arena, piece) {
 function merge(arena, piece) {
     piece.matrix.forEach((row, y) => {
         row.forEach((value, x) => {
-            if (value !== 0) {
-                arena[y + piece.y][x + piece.x] = piece.color;
-            }
+            if (value !== 0) arena[y + piece.y][x + piece.x] = piece.color;
         });
     });
 }
@@ -74,7 +66,7 @@ function rotate(matrix) {
 }
 
 function playerRotate() {
-    if (gameOver) return;
+    if (gameOver || isPaused) return;
     const posX = currentPiece.x;
     let offset = 1;
     const originalMatrix = currentPiece.matrix;
@@ -92,15 +84,13 @@ function playerRotate() {
 }
 
 function playerMove(dir) {
-    if (gameOver) return;
+    if (gameOver || isPaused) return;
     currentPiece.x += dir;
-    if (collide(board, currentPiece)) {
-        currentPiece.x -= dir;
-    }
+    if (collide(board, currentPiece)) currentPiece.x -= dir;
 }
 
 function playerDrop() {
-    if (gameOver) return;
+    if (gameOver || isPaused) return;
     currentPiece.y++;
     if (collide(board, currentPiece)) {
         currentPiece.y--;
@@ -112,7 +102,7 @@ function playerDrop() {
 }
 
 function hardDrop() {
-    if (gameOver) return;
+    if (gameOver || isPaused) return;
     while (!collide(board, currentPiece)) {
         currentPiece.y++;
     }
@@ -174,9 +164,22 @@ function draw() {
     if (currentPiece) {
         drawMatrix(currentPiece.matrix, { x: currentPiece.x, y: currentPiece.y }, currentPiece.color);
     }
+
+    // Tampilkan tulisan PAUSED jika sedang berhenti
+    if (isPaused) {
+        ctx.fillStyle = "rgba(15, 23, 42, 0.75)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "#38bdf8";
+        ctx.font = "bold 24px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("PAUSED", canvas.width / 2, canvas.height / 2);
+    }
 }
 
 function update(time = 0) {
+    if (isPaused) return;
+
     const deltaTime = time - lastTime;
     lastTime = time;
 
@@ -189,13 +192,32 @@ function update(time = 0) {
     if (!gameOver) requestAnimationFrame(update);
 }
 
-// Tombol Virtual HP
+// Fitur Toggle Pause
+function togglePause() {
+    if (gameOver) return;
+    isPaused = !isPaused;
+
+    if (isPaused) {
+        pauseBtn.textContent = "▶ Lanjut";
+        pauseBtn.style.background = "#10b981";
+        draw();
+    } else {
+        pauseBtn.textContent = "⏸ Pause";
+        pauseBtn.style.background = "#f59e0b";
+        lastTime = performance.now();
+        requestAnimationFrame(update);
+    }
+}
+
+// Event Listeners
 document.getElementById("btnLeft")?.addEventListener("click", () => playerMove(-1));
 document.getElementById("btnRight")?.addEventListener("click", () => playerMove(1));
 document.getElementById("btnDown")?.addEventListener("click", () => playerDrop());
 document.getElementById("btnRotate")?.addEventListener("click", () => playerRotate());
 document.getElementById("btnDrop")?.addEventListener("click", () => hardDrop());
+pauseBtn?.addEventListener("click", togglePause);
 
-// Inisialisasi awal
+// Mulai Permainan
 resetPiece();
-update();
+lastTime = performance.now();
+requestAnimationFrame(update);
