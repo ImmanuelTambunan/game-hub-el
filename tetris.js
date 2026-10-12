@@ -1,3 +1,4 @@
+// @ts-nocheck
 const canvas = document.getElementById("tetrisCanvas");
 const ctx = canvas.getContext("2d");
 const scoreDisplay = document.getElementById("score");
@@ -168,10 +169,8 @@ function draw() {
     ctx.fillStyle = "#111827";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Gambar grid papan
     drawMatrix(board, { x: 0, y: 0 });
 
-    // Gambar balok yang sedang turun
     if (currentPiece) {
         drawMatrix(currentPiece.matrix, { x: currentPiece.x, y: currentPiece.y }, currentPiece.color);
     }
@@ -182,7 +181,7 @@ function update(time = 0) {
     lastTime = time;
 
     dropCounter += deltaTime;
-    if (dropCounter > 800) { // Balok turun otomatis setiap 800ms
+    if (dropCounter > 800) {
         playerDrop();
     }
 
@@ -197,6 +196,6 @@ document.getElementById("btnDown")?.addEventListener("click", () => playerDrop()
 document.getElementById("btnRotate")?.addEventListener("click", () => playerRotate());
 document.getElementById("btnDrop")?.addEventListener("click", () => hardDrop());
 
-// Mulai Permainan
+// Inisialisasi awal
 resetPiece();
 update();
