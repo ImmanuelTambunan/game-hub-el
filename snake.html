@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Snake Classic</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: manipulation;
+            font-family: system-ui, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .header-bar {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .btn-back {
+            background: #334155;
+            color: #f8fafc;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .scoreboard {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+
+        /* Area Game Canvas */
+        #gameCanvas {
+            background-color: #1e293b;
+            border: 2px solid #38bdf8;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Tombol Kontrol Virtual (D-Pad) */
+        .controls {
+            margin-top: 18px;
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(2, 60px);
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .ctrl-btn {
+            background: #334155;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            box-shadow: 0 4px 0 #1e293b;
+        }
+
+        .ctrl-btn:active {
+            background: #10b981;
+            transform: translateY(3px);
+            box-shadow: none;
+        }
+
+        .btn-up    { grid-column: 2; grid-row: 1; }
+        .btn-left  { grid-column: 1; grid-row: 2; }
+        .btn-down  { grid-column: 2; grid-row: 2; }
+        .btn-right { grid-column: 3; grid-row: 2; }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <a href="index.html" class="btn-back">⬅ Menu</a>
+        <div class="scoreboard">Skor: <span id="score">0</span></div>
+    </div>
+
+    <!-- Canvas Tempat Game Dirender -->
+    <canvas id="gameCanvas" width="300" height="300"></canvas>
+
+    <!-- Tombol Khusus Layar Sentuh HP -->
+    <div class="controls">
+        <button class="ctrl-btn btn-up" id="btnUp">▲</button>
+        <button class="ctrl-btn btn-left" id="btnLeft">◀</button>
+        <button class="ctrl-btn btn-down" id="btnDown">▼</button>
+        <button class="ctrl-btn btn-right" id="btnRight">▶</button>
+    </div>
+
+    <script src="snake.js"></script>
+</body>
+</html>
